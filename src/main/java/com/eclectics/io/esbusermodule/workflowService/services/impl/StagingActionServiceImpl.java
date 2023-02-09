@@ -1,6 +1,6 @@
 package com.eclectics.io.esbusermodule.workflowService.services.impl;
 
-import com.eclectics.io.esbusermodule.service.NotificationService;
+import com.eclectics.io.esbusermodule.service.impl.NotificationService;
 import com.eclectics.io.esbusermodule.util.UniversalResponse;
 import com.eclectics.io.esbusermodule.workflowService.Exception.InvalidOperation;
 import com.eclectics.io.esbusermodule.workflowService.Exception.ItemNotFoundException;
@@ -209,7 +209,7 @@ public class StagingActionServiceImpl implements StagingActionService {
                             .map (stagingAction -> {
                                 stagingAction.setProcessed (true);
                                 return stagingActionRepository.save (stagingAction);
-                            }).collect (Collectors.toList ());
+                            }).toList ();
                 })
                 .publishOn (Schedulers.boundedElastic ());
     }

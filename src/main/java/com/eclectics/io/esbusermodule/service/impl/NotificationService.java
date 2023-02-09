@@ -1,4 +1,4 @@
-package com.eclectics.io.esbusermodule.service;
+package com.eclectics.io.esbusermodule.service.impl;
 
 import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;

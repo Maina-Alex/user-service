@@ -1,8 +1,9 @@
-package com.eclectics.io.esbusermodule.service;
+package com.eclectics.io.esbusermodule.service.impl;
 
 import com.eclectics.io.esbusermodule.constants.MessageType;
 import com.eclectics.io.esbusermodule.model.*;
 import com.eclectics.io.esbusermodule.repository.*;
+import com.eclectics.io.esbusermodule.service.IUserInterface;
 import com.eclectics.io.esbusermodule.util.UniversalResponse;
 import com.eclectics.io.esbusermodule.util.UtilFunctions;
 import com.eclectics.io.esbusermodule.wrapper.*;
@@ -19,7 +20,6 @@ import reactor.core.scheduler.Schedulers;
 
 import java.time.Duration;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * @author Alex Maina
@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
  **/
 @Service
 @RequiredArgsConstructor
-public class UserService {
+public class UserService implements IUserInterface {
     private final SystemUserRepository systemUserRepository;
     private final Gson gson;
     private final PasswordEncoder passwordEncoder;
@@ -43,6 +43,7 @@ public class UserService {
      * @param createUserWrapper UserWrapper
      * @return Universal response of success if user is saved
      */
+    @Override
     public Mono<UniversalResponse> createSystemUser(CreateUserWrapper createUserWrapper) {
         return Mono.fromCallable (() -> {
             if (systemUserRepository.findTopByEmailAndSoftDeleteFalse (createUserWrapper.getEmail ()).isPresent ()) {
@@ -83,7 +84,7 @@ public class UserService {
                 .orElse (messageTemplateRepository.findByMessageTypeAndDefaultTemplateTrueAndSoftDeleteFalse (messageType));
 
     }
-
+    @Override
     public Mono<UniversalResponse> updateUser(UpdateUserWrapper updateUserWrapper) {
         return Mono.fromCallable (() -> {
             SystemUser systemUser = systemUserRepository
@@ -109,7 +110,7 @@ public class UserService {
             return UniversalResponse.builder ().status (200).message ("User updated successfully").build ();
         }).publishOn (Schedulers.boundedElastic ());
     }
-
+    @Override
     public Mono<UniversalResponse> resetUser(ResetUserPassword resetUserPassword) {
         return Mono.fromCallable (() -> {
             SystemUser systemUser = systemUserRepository
@@ -128,7 +129,7 @@ public class UserService {
             return UniversalResponse.builder ().status (200).message ("User reset successfully").build ();
         }).publishOn (Schedulers.boundedElastic ());
     }
-
+    @Override
     public Mono<UniversalResponse> updateUserPassword(UpdatePasswordWrapper passwordWrapper) {
         return Mono.fromCallable (() -> {
             SystemUser systemUser = systemUserRepository.findTopByIdAndSoftDeleteFalse (passwordWrapper.getId ())
@@ -150,7 +151,7 @@ public class UserService {
             return UniversalResponse.builder ().status (200).message ("Password update successfully").build ();
         }).publishOn (Schedulers.boundedElastic ());
     }
-
+    @Override
     public Mono<UniversalResponse> getUserById(CommonWrapper commonWrapper) {
         return Mono.fromCallable (() -> {
             SystemUser systemUser = systemUserRepository.findTopByIdAndSoftDeleteFalse (commonWrapper.getId ())
@@ -163,7 +164,7 @@ public class UserService {
                     .data (systemUser).build ();
         }).publishOn (Schedulers.boundedElastic ());
     }
-
+    @Override
     public Mono<UniversalResponse> getAllUsers(CommonWrapper commonWrapper) {
         return Mono.fromCallable (() -> {
             Pageable pageable = PageRequest.of (commonWrapper.getPage (), commonWrapper.getSize ());
@@ -178,7 +179,7 @@ public class UserService {
                     .totalItems ((int) systemUsers.getTotalElements ()).build ();
         }).publishOn (Schedulers.boundedElastic ());
     }
-
+    @Override
     public Mono<UniversalResponse> deleteUser(CommonWrapper commonWrapper) {
         return Mono.fromCallable (() -> {
             SystemUser systemUser = systemUserRepository.findTopByIdAndSoftDeleteFalse (commonWrapper.getId ())
@@ -194,7 +195,7 @@ public class UserService {
                     .build ();
         }).publishOn (Schedulers.boundedElastic ());
     }
-
+    @Override
     public Mono<UniversalResponse> disableUser(CommonWrapper commonWrapper) {
         return Mono.fromCallable (() -> {
             SystemUser systemUser = systemUserRepository.findTopByIdAndSoftDeleteFalse (commonWrapper.getId ())
@@ -208,7 +209,7 @@ public class UserService {
             return UniversalResponse.builder ().message ("System administrator disabled successfully").build ();
         }).publishOn (Schedulers.boundedElastic ());
     }
-
+    @Override
     public Mono<UniversalResponse> enableUser(CommonWrapper commonWrapper) {
         return Mono.fromCallable (() -> {
             SystemUser systemUser = systemUserRepository.findTopByIdAndSoftDeleteFalse (commonWrapper.getId ())
@@ -223,7 +224,7 @@ public class UserService {
                     .build ();
         }).publishOn (Schedulers.boundedElastic ());
     }
-
+    @Override
     public Mono<UniversalResponse> createProfile(CreateProfileWrapper profileWrapper) {
         return Mono.fromCallable (() -> {
             if (profileRepository.findByNameAndSoftDeleteFalse (profileWrapper.getName ()).isPresent ()) {
@@ -236,7 +237,7 @@ public class UserService {
             return UniversalResponse.builder ().status (200).message ("Profile saved successfully").build ();
         }).publishOn (Schedulers.boundedElastic ());
     }
-
+    @Override
     public Mono<UniversalResponse> updateProfile(CommonProfileWrapper profileWrapper) {
         return Mono.fromCallable (() -> {
             Profile profile = profileRepository.findByIdAndSoftDeleteFalse (profileWrapper.getId ())
@@ -249,7 +250,7 @@ public class UserService {
             return UniversalResponse.builder ().status (200).message ("Profile updated successfully").build ();
         }).publishOn (Schedulers.boundedElastic ());
     }
-
+    @Override
     public Mono<UniversalResponse> archiveProfile(CommonProfileWrapper commonProfileWrapper) {
         return Mono.fromCallable (() -> {
             Profile profile = profileRepository.findByIdAndSoftDeleteFalse (commonProfileWrapper.getId ())
@@ -266,7 +267,7 @@ public class UserService {
             return UniversalResponse.builder ().status (200).message ("Profile archived successfully").build ();
         }).publishOn (Schedulers.boundedElastic ());
     }
-
+    @Override
     public Mono<UniversalResponse> getProfile(CommonProfileWrapper commonProfileWrapper) {
         return Mono.fromCallable (() -> {
             Profile profile = profileRepository.findByIdAndSoftDeleteFalse (commonProfileWrapper.getId ())
@@ -280,14 +281,14 @@ public class UserService {
                             .roleId (profileRoles.getRole ().getId ())
                             .name (profileRoles.getRole ().getName ())
                             .systemRole (profileRoles.getRole ().isSystemRole ())
-                            .build ()).collect (Collectors.toList ());
+                            .build ()).toList ();
 
             return UniversalResponse.builder ().status (200)
                     .message ("profile info")
                     .data (Map.of ("profile", profile, "roles", profileRolesList)).build ();
         }).publishOn (Schedulers.boundedElastic ());
     }
-
+    @Override
     public Mono<UniversalResponse> getProfiles(CommonWrapper commonWrapper) {
         return Mono.fromCallable (() -> {
             Pageable pageable = PageRequest.of (commonWrapper.getPage (), commonWrapper.getSize ());
@@ -296,16 +297,34 @@ public class UserService {
                     .data (profilesPage.toList ()).totalItems (profilesPage.getNumberOfElements ()).build ();
         }).publishOn (Schedulers.boundedElastic ());
     }
-
-    public Mono<UniversalResponse> getAllRoles() {
+    @Override
+    public Mono<UniversalResponse> getAllRoles(CommonWrapper commonWrapper) {
         return Mono.fromCallable (() -> {
-            List<Role> roles = roleRepository.findAllBySoftDeleteFalse ();
-            return UniversalResponse.builder ().status (200).message ("All roles").data (roles)
-                    .totalItems (roles.size ())
+            Pageable pageable= PageRequest.of (commonWrapper.getPage (), commonWrapper.getSize ());
+            Page<Role> roles = roleRepository.findAllBySoftDeleteFalse (pageable);
+            return UniversalResponse.builder ().status (200).message ("All roles").data (roles.toList ())
+                    .totalItems ((int)roles.getTotalElements ())
                     .build ();
         }).publishOn (Schedulers.boundedElastic ());
     }
 
+    @Override
+    public Mono<UniversalResponse> deleteRole(CommonRoleWrapper roleWrapper) {
+        return Mono.fromCallable (()-> {
+            Role role= roleRepository.findByIdAndSoftDeleteFalse (roleWrapper.getRoleId ())
+                    .orElse (null);
+            if(role==null)
+                return UniversalResponse.builder ().status (400).message ("Role not found").build ();
+            if(role.isSystemRole ()){
+                return UniversalResponse.builder ().status (400).message ("Cannot delete a system role").build ();
+            }
+            role.setSoftDelete (true);
+            roleRepository.save (role);
+            return UniversalResponse.builder ().status (200).message ("Role saved successfully").build ();
+        }).publishOn (Schedulers.boundedElastic ());
+    }
+
+    @Override
     public Mono<UniversalResponse> addRole(CommonRoleWrapper roleWrapper) {
         return Mono.fromCallable (() -> {
             if (roleRepository.findByNameAndSoftDeleteFalse (roleWrapper.getName ()).isPresent ()) {
@@ -322,7 +341,7 @@ public class UserService {
         }).publishOn (Schedulers.boundedElastic ());
     }
 
-
+    @Override
     public Mono<UniversalResponse> addRolesToProfile(CommonRoleWrapper commonRoleWrapper) {
         return Mono.fromCallable (() -> {
             Profile profile = profileRepository.findByIdAndSoftDeleteFalse (commonRoleWrapper.getProfileId ())
@@ -354,7 +373,7 @@ public class UserService {
             return UniversalResponse.builder ().status (200).message ("Added roles to profile successfully").build ();
         }).publishOn (Schedulers.boundedElastic ());
     }
-
+    @Override
     public Mono<UniversalResponse> removeRolesFromProfile(CommonRoleWrapper commonRoleWrapper) {
         return Mono.fromCallable (() -> {
             Profile profile = profileRepository.findByIdAndSoftDeleteFalse (commonRoleWrapper.getProfileId ())
@@ -380,7 +399,7 @@ public class UserService {
             return UniversalResponse.builder ().status (200).message ("Removed roles successfully").build ();
         }).publishOn (Schedulers.boundedElastic ());
     }
-
+    @Override
     @SuppressWarnings ("UnstableApiUsage")
     public Mono<UniversalResponse> addMessageTemplate(MessageTemplate messageTemplate) {
         return Mono.fromCallable (() -> {
@@ -417,12 +436,12 @@ public class UserService {
             return UniversalResponse.builder ().status (200).message ("Message template updated successfully").build ();
         }).publishOn (Schedulers.boundedElastic ());
     }
-
+    @Override
     public Mono<UniversalResponse> getMessageTypes() {
         return Mono.just (UniversalResponse.builder ().status (200).message ("Message types")
                 .data (MessageType.values ()).build ()).cache (Duration.ofMinutes (3));
     }
-
+    @Override
     public Mono<UniversalResponse> getMessageTemplates(){
         return Mono.fromCallable (()-> {
             List<MessageTemplate> messageTemplates= new ArrayList<> ();
