@@ -4,6 +4,7 @@ package com.eclectics.io.esbusermodule.workflowService.services;
 import com.eclectics.io.esbusermodule.util.UniversalResponse;
 import com.eclectics.io.esbusermodule.workflowService.dto.WorkFlowDto;
 import com.eclectics.io.esbusermodule.workflowService.dto.WorkFlowStepDto;
+import com.eclectics.io.esbusermodule.wrapper.CommonWrapper;
 import reactor.core.publisher.Mono;
 
 /**
@@ -14,6 +15,7 @@ public interface WorkFlowService {
     Mono<UniversalResponse> createWorkFlow(WorkFlowDto workFlowDto);
     Mono<UniversalResponse> updateWorkFlow(WorkFlowDto workFlowDto);
     Mono<UniversalResponse> getWorkFlow(WorkFlowDto workFlowDto);
+    Mono<UniversalResponse> getWorkFlows(CommonWrapper commonWrapper);
     Mono<UniversalResponse> deleteWorkFlow(WorkFlowDto workFlowDto);
     Mono<UniversalResponse> getStepsInWorkFlow(WorkFlowDto workFlowDto);
     Mono<UniversalResponse> addWorkFlowStep(WorkFlowStepDto workFlowStepDto);

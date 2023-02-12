@@ -1,6 +1,8 @@
 package com.eclectics.io.esbusermodule.service;
 
+import com.eclectics.io.esbusermodule.constants.MessageType;
 import com.eclectics.io.esbusermodule.model.MessageTemplate;
+import com.eclectics.io.esbusermodule.model.Profile;
 import com.eclectics.io.esbusermodule.util.UniversalResponse;
 import com.eclectics.io.esbusermodule.wrapper.*;
 import reactor.core.publisher.Mono;
@@ -32,5 +34,6 @@ public interface IUserInterface {
     Mono<UniversalResponse> addMessageTemplate(MessageTemplate messageTemplate);
     Mono<UniversalResponse> getMessageTypes();
     Mono<UniversalResponse> getMessageTemplates();
-
+    MessageTemplate getMessageTemplateByType(MessageType messageType);
+    Mono<Profile> getUserProfile(String username);
 }

@@ -12,9 +12,13 @@ import com.eclectics.io.esbusermodule.workflowService.repository.WorkFlowReposit
 import com.eclectics.io.esbusermodule.workflowService.repository.WorkFlowStepRepository;
 import com.eclectics.io.esbusermodule.workflowService.services.StagingActionService;
 import com.eclectics.io.esbusermodule.workflowService.services.WorkFlowService;
+import com.eclectics.io.esbusermodule.wrapper.CommonWrapper;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
@@ -74,6 +78,15 @@ public class WorkFlowServiceImpl implements WorkFlowService {
     }
 
     @Override
+    public Mono<UniversalResponse> getWorkFlows(CommonWrapper commonWrapper) {
+        return Mono.fromCallable (()-> {
+            Pageable pageable= PageRequest.of (commonWrapper.getPage (), commonWrapper.getSize ());
+            Page<WorkFlow> workFlows= workFlowRepository.findAllBySoftDeleteFalse (pageable);
+            return UniversalResponse.builder ().status (200).message ("Workflows").data (workFlows).build ();
+        }).publishOn (Schedulers.boundedElastic ());
+    }
+
+    @Override
     public Mono<UniversalResponse> deleteWorkFlow(WorkFlowDto workFlowDto) {
         return Mono.fromCallable (() -> {
             WorkFlow workFlow = workFlowRepository.findByIdAndSoftDeleteFalse (workFlowDto.getId ())
@@ -89,6 +102,8 @@ public class WorkFlowServiceImpl implements WorkFlowService {
         }).publishOn (Schedulers.boundedElastic ());
 
     }
+
+
     @Override
     public Mono<UniversalResponse> addWorkFlowStep(WorkFlowStepDto workFlowStepDto) {
         return Mono.fromCallable (() -> {

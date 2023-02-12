@@ -5,6 +5,7 @@ import com.eclectics.io.esbusermodule.model.MessageTemplate;
 import com.eclectics.io.esbusermodule.model.Profile;
 import com.eclectics.io.esbusermodule.model.SystemUser;
 import com.eclectics.io.esbusermodule.repository.*;
+import com.eclectics.io.esbusermodule.service.IUserInterface;
 import com.eclectics.io.esbusermodule.service.impl.NotificationService;
 import com.eclectics.io.esbusermodule.service.impl.UserService;
 import com.eclectics.io.esbusermodule.wrapper.CreateUserWrapper;
@@ -136,6 +137,18 @@ class UserServiceTest {
                 }).verifyComplete ();
     }
 
+
+    @Test
+    void getMessageTemplate_validMessageType_returnMessageTemplate(){
+        when(messageTemplateRepository.findByMessageTypeAndActiveTrueAndSoftDeleteFalse(any (MessageType.class)))
+                .thenReturn (Optional.ofNullable (welcomeMessageTemplate));
+         assertThat (userService
+                 .getMessageTemplateByType (MessageType.WELCOME_ADMIN_MESSAGE))
+                 .isEqualTo (welcomeMessageTemplate);
+    }
+
+//    @Test
+//    void updateUser_userDoes_notExists_returnUniversal
 
     @AfterEach
     public void tearDown() throws Exception {

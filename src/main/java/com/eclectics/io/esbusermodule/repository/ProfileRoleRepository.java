@@ -9,7 +9,7 @@ import java.util.Optional;
 public interface ProfileRoleRepository extends JpaRepository<ProfileRoles,Long> {
     List<ProfileRoles> findAllByProfileIdAndSoftDeleteFalse(long profileId);
 
-    boolean existByProfileIdAndRoleIdAndSoftDeleteFalse(long profileId, long roleId);
+    boolean existsByProfileIdAndRoleIdAndSoftDeleteFalse(long profileId, long roleId);
 
     Optional<ProfileRoles> findByProfileIdAndRoleIdAndSoftDeleteFalse(long profileId, long roleId);
 }

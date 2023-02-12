@@ -84,6 +84,19 @@ public class UserService implements IUserInterface {
                 .orElse (messageTemplateRepository.findByMessageTypeAndDefaultTemplateTrueAndSoftDeleteFalse (messageType));
 
     }
+
+    @Override
+    public Mono<Profile> getUserProfile(String username) {
+        return Mono.fromCallable (() -> {
+            SystemUser systemUser = systemUserRepository.findTopByEmailAndSoftDeleteFalse (username)
+                    .orElse (null);
+            if (systemUser == null)
+                throw new IllegalStateException ("User does not have a profile");
+
+            return systemUser.getProfile ();
+        }).publishOn (Schedulers.boundedElastic ());
+    }
+
     @Override
     public Mono<UniversalResponse> updateUser(UpdateUserWrapper updateUserWrapper) {
         return Mono.fromCallable (() -> {
@@ -356,7 +369,7 @@ public class UserService implements IUserInterface {
                                 .orElse (null);
                         if (role == null) {
                             invalidRoles.add (String.format ("Role by id %s does not exists", roleId));
-                        } else if (profileRolesRepository.existByProfileIdAndRoleIdAndSoftDeleteFalse (profile.getId (), roleId)) {
+                        } else if (profileRolesRepository.existsByProfileIdAndRoleIdAndSoftDeleteFalse (profile.getId (), roleId)) {
                             invalidRoles.add (String.format ("Role by id %s already exists in profile", roleId));
                         } else {
                             ProfileRoles profileRoles = ProfileRoles.builder ()

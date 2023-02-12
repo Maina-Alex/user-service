@@ -13,13 +13,9 @@ import java.util.List;
 
 public interface StagingActionService {
     UniversalResponse checkAndStageWorkFlow(StagingActionDto stagingActionDto);
-    Mono<List<StagingActionDto>> getStagedActionsByProcessNameAndApproverProfileId(StagingActionDto stagingActionDto);
-    Mono<List<StagingActionDto>> getStagedActionsByGroupProcessesAndApproverId(StagingActionDto stagingActionDto);
-
+    Mono<List<StagingActionDto>> getStagedActionsByGroupProcesses(StagingActionDto stagingActionDto);
     Mono<UniversalResponse> approveStagedActionByWorkFlowIdAndStagedActionId(ApproveStagedActionWrapper approveStagedActionWrapper);
     Mono<Void> resetAllStageApprovalsOnStepEdits(long workflowId);
-
-    Mono<List<StagingAction>> getApprovedStagedActionsPendingProcessing(Mono<WorkFlowDto> workFlowDtoMono);
 
 
 }

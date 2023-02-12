@@ -80,27 +80,6 @@ public class StagingActionServiceImpl implements StagingActionService {
                                  .build ()).build ();
     }
 
-    @Override
-    public Mono<List<StagingActionDto>> getStagedActionsByProcessNameAndApproverProfileId(StagingActionDto stagingActionDto) {
-        return Mono.fromCallable (() -> stagingActionRepository.findAllStagedDataByProcessNameAndSoftDeleteFalse(stagingActionDto.getProcess ())
-                .stream ()
-                .map (stagingAction -> {
-                    WorkFlow workFlow = stagingAction.getWorkflow ();
-                    int currStep = stagingAction.getCurrentStepIndex ();
-                    Type listType = new TypeToken<ArrayList<Long>> () {}.getType ();
-                    List<Long> stagingActionList = new Gson ().fromJson (workFlow.getWorkflowStepsOrder (), listType);
-                    WorkFlowStep workFlowStep = workFlowStepRepository.findByIdAndWorkFlowIdAndSoftDeleteFalse (stagingActionList.get (currStep), workFlow.getId ()).orElse (null);
-                    if (workFlowStep == null) return null;
-                    StagingActionDto response = new StagingActionDto ();
-                    BeanUtils.copyProperties (stagingAction, response);
-                    response.setFinalized (stagingAction.isFinalized ());
-                    response.setCanApprove (stagingActionDto.getApproverId () == workFlowStep.getRequiredRoleId ());
-                    return response;
-                })
-                .filter (Objects::nonNull)
-                .collect (Collectors.toList ())).publishOn (Schedulers.boundedElastic ());
-    }
-
     private void sendNotificationEmail(WorkFlowStep workFlowStep) {
         Mono.fromRunnable (() -> {
             String title = " ESB STAGED REQUEST REQUIRING APPROVAL";
@@ -111,7 +90,7 @@ public class StagingActionServiceImpl implements StagingActionService {
     }
 
     @Override
-    public Mono<List<StagingActionDto>> getStagedActionsByGroupProcessesAndApproverId(StagingActionDto stagingActionDto) {
+    public Mono<List<StagingActionDto>> getStagedActionsByGroupProcesses(StagingActionDto stagingActionDto) {
         return Mono.fromCallable (() -> {
             List<StagingActionDto> stagingActionsList = new ArrayList<> ();
             stagingActionDto.getProcesses ().forEach (process -> {

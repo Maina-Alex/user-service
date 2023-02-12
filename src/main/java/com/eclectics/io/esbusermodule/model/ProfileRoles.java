@@ -23,5 +23,4 @@ public class ProfileRoles extends BaseEntity {
     private Profile profile;
     @ManyToOne
     private Role role;
-
 }

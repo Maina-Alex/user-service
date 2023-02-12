@@ -3,6 +3,7 @@ package com.eclectics.io.esbusermodule.model;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.SQLDelete;
 
 import javax.persistence.*;
 import java.io.Serializable;
