@@ -1,9 +1,10 @@
 package com.eclectics.io.esbusermodule.workflowService.services.impl;
 
-
+import com.eclectics.io.esbusermodule.constants.SystemProcess;
 import com.eclectics.io.esbusermodule.util.UniversalResponse;
 import com.eclectics.io.esbusermodule.workflowService.Exception.ItemExistException;
 import com.eclectics.io.esbusermodule.workflowService.Exception.ItemNotFoundException;
+import com.eclectics.io.esbusermodule.workflowService.WorkFlowFilter;
 import com.eclectics.io.esbusermodule.workflowService.dto.WorkFlowDto;
 import com.eclectics.io.esbusermodule.workflowService.dto.WorkFlowStepDto;
 import com.eclectics.io.esbusermodule.workflowService.model.WorkFlow;
@@ -13,6 +14,8 @@ import com.eclectics.io.esbusermodule.workflowService.repository.WorkFlowStepRep
 import com.eclectics.io.esbusermodule.workflowService.services.StagingActionService;
 import com.eclectics.io.esbusermodule.workflowService.services.WorkFlowService;
 import com.eclectics.io.esbusermodule.wrapper.CommonWrapper;
+import static com.eclectics.io.esbusermodule.constants.SystemProcess.*;
+
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import lombok.AllArgsConstructor;
@@ -27,7 +30,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
+
 
 /**
  * @author Alex Maina
@@ -40,6 +43,7 @@ public class WorkFlowServiceImpl implements WorkFlowService {
     private final WorkFlowStepRepository workFlowStepRepository;
     private final StagingActionService stagingActionService;
 
+    @WorkFlowFilter (processName = SystemProcess.CREATE_WORKFLOW)
     @Override
     public Mono<UniversalResponse> createWorkFlow(WorkFlowDto workFlowDto) {
         return Mono.fromCallable (() -> {
@@ -57,6 +61,7 @@ public class WorkFlowServiceImpl implements WorkFlowService {
         }).publishOn (Schedulers.boundedElastic ());
     }
 
+    @WorkFlowFilter (processName = UPDATE_WORKFLOW)
     @Override
     public Mono<UniversalResponse> updateWorkFlow(WorkFlowDto workFlowDto) {
         return Mono.fromCallable (() -> {
@@ -86,6 +91,7 @@ public class WorkFlowServiceImpl implements WorkFlowService {
         }).publishOn (Schedulers.boundedElastic ());
     }
 
+    @WorkFlowFilter (processName = DELETE_WORKFLOW)
     @Override
     public Mono<UniversalResponse> deleteWorkFlow(WorkFlowDto workFlowDto) {
         return Mono.fromCallable (() -> {
@@ -103,7 +109,7 @@ public class WorkFlowServiceImpl implements WorkFlowService {
 
     }
 
-
+    @WorkFlowFilter (processName = ADD_WORKFLOW_STEP)
     @Override
     public Mono<UniversalResponse> addWorkFlowStep(WorkFlowStepDto workFlowStepDto) {
         return Mono.fromCallable (() -> {
@@ -156,6 +162,7 @@ public class WorkFlowServiceImpl implements WorkFlowService {
         }).publishOn (Schedulers.boundedElastic ());
     }
 
+    @WorkFlowFilter (processName = UPDATE_WORKFLOW_STEP)
     @Override
     public Mono<UniversalResponse> updateWorkFlowStep(WorkFlowStepDto workFlowStepDto) {
         return Mono.fromCallable (() -> {
@@ -174,6 +181,7 @@ public class WorkFlowServiceImpl implements WorkFlowService {
         }).publishOn (Schedulers.boundedElastic ());
     }
 
+    @WorkFlowFilter (processName = DELETE_WORKFLOW_STEP)
     @Override
     public Mono<UniversalResponse> removeWorkFlowStep(WorkFlowStepDto workFlowStepDto) {
             return Mono.fromCallable (() -> {
@@ -207,7 +215,7 @@ public class WorkFlowServiceImpl implements WorkFlowService {
                     .filter (Optional::isPresent)
                     .map (Optional::get)
                     .map (WorkFlowStep::getId)
-                    .collect (Collectors.toList ());
+                    .toList ();
 
             WorkFlow workFlow = workFlowRepository.findByIdAndSoftDeleteFalse (workFlowDto.getId ())
                     .orElseThrow (() -> new ItemNotFoundException ("Workflow not found"));

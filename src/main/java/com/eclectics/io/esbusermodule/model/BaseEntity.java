@@ -26,7 +26,7 @@ public class BaseEntity implements Serializable {
     @Column(name = "created_on",updatable = false)
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     public LocalDateTime createdOn;
-    @Column(name = "softDelete", columnDefinition = "char(1) default 0")
+    @Column(name = "soft_delete", columnDefinition = "char(1) default 0")
     private boolean softDelete;
 
     @PrePersist

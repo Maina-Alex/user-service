@@ -1,6 +1,8 @@
 package com.eclectics.io.esbusermodule.model;
 
 import lombok.*;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -18,6 +20,8 @@ import javax.persistence.Table;
 @NoArgsConstructor
 @Entity
 @Builder
+@SQLDelete(sql = "update tb_profile_roles set soft_delete=true")
+@Where(clause = "soft_delete = false")
 public class ProfileRoles extends BaseEntity {
     @ManyToOne
     private Profile profile;

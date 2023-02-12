@@ -11,8 +11,6 @@ import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
-import java.util.Arrays;
-
 /**
  * @author Alex Maina
  * @created 08/02/2023

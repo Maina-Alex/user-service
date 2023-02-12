@@ -1,0 +1,57 @@
+spring:
+
+  redis:
+    host: 10.20.2.12
+    port: 7150
+
+  application:
+    name: auth-server
+
+  datasource:
+    username: esb_db_user
+    url: jdbc:oracle:thin:@10.20.2.151:1521/ekenyaoracle
+    password: W211#567isCool
+    driver-class-name: oracle.jdbc.OracleDriver
+
+  jpa:
+    database-platform: org.hibernate.dialect.Oracle12cDialect
+    hibernate:
+      ddl-auto: update
+
+  cloud:
+    function:
+      definition: publishRoles
+    stream:
+      kafka:
+        binder:
+          brokers: http://10.20.2.12:9092
+          auto-create-topics: true
+      bindings:
+        publishRoles-in-0:
+          destination: auth-user
+
+
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    registryFetchIntervalSeconds: 10
+    prefer-same-zone-eureka: true
+    register-with-eureka: true
+    serviceUrl:
+      defaultZone: http://10.20.2.12:9713/eureka
+    fetch-registry: true
+    enabled: off
+
+key:
+  name: authorization.p12
+  alias: eclectics-auth
+  password: RSwr$%@8L?
+
+logging:
+  file:
+    name: ./logs/${spring.application.name}.log
+
+default:
+  admin:
+    email:

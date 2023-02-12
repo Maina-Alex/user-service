@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -16,6 +18,8 @@ import java.util.Date;
 @AllArgsConstructor
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@SQLDelete(sql = "update tb_system_users set soft_delete=true")
+@Where(clause = "soft_delete = false")
 public class SystemUser extends BaseEntity{
     @JsonIgnore
     private String userName;

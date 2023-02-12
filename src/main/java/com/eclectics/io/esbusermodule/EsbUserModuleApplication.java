@@ -1,5 +1,6 @@
 package com.eclectics.io.esbusermodule;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -22,6 +23,10 @@ public class EsbUserModuleApplication {
 	@Bean
 	public PasswordEncoder providesEncoder(){
 		return new BCryptPasswordEncoder ();
+	}
+	@Bean
+	public ObjectMapper objectMapper(){
+		return new ObjectMapper ();
 	}
 }
 

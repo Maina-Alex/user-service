@@ -31,7 +31,6 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * @author Alex Maina
@@ -48,17 +47,16 @@ public class StagingActionServiceImpl implements StagingActionService {
     private final Gson gson;
 
     @Override
-    public UniversalResponse checkAndStageWorkFlow(StagingActionDto stagingActionDto) {
-
+    public WorkFlowResponseStatus checkAndStageWorkFlow(StagingActionDto stagingActionDto) {
                     WorkFlow workFlow = workFlowRepository.findByProcessAndSoftDeleteFalse (stagingActionDto.getProcess ()).orElse (null);
                     if (workFlow == null) {
-                        return UniversalResponse.builder ().status (200).message ("No WorkFlow, Proceed request").data (WorkFlowResponseDto.builder ().statusCode (WorkFlowResponseStatus.NOT_PRESENT.getStatus ()).build ()).build ();
+                        return WorkFlowResponseStatus.NOT_PRESENT;
                     }
                     Type listType = new TypeToken<ArrayList<Long>> () {
                     }.getType ();
                     List<Long> workFlowStepOrderList = gson.fromJson (workFlow.getWorkflowStepsOrder (), listType);
                     if (workFlowStepOrderList.isEmpty ()) {
-                        return UniversalResponse.builder ().status (200).message ("No Workflow, Proceed request").data (WorkFlowResponseDto.builder ().statusCode (WorkFlowResponseStatus.NOT_PRESENT.getStatus ()).build ()).build ();
+                        return WorkFlowResponseStatus.NOT_PRESENT;
                     }
                     StagingAction stagingAction = StagingAction.builder ()
                             .stagingUserDetails (stagingActionDto.getStagingUserDetails ())
@@ -74,10 +72,7 @@ public class StagingActionServiceImpl implements StagingActionService {
                     stagingActionRepository.save (stagingAction);
                     workFlowStepRepository.findByIdAndWorkFlowIdAndSoftDeleteFalse (workFlowStepOrderList.get (0),workFlow.getId ())
                             .ifPresent (this::sendNotificationEmail);
-                 return UniversalResponse.builder ().status (200).message ("Stage response")
-                         .data (WorkFlowResponseDto.builder ()
-                                 .statusCode (WorkFlowResponseStatus.STAGED.getStatus ())
-                                 .build ()).build ();
+                 return WorkFlowResponseStatus.STAGED;
     }
 
     private void sendNotificationEmail(WorkFlowStep workFlowStep) {
@@ -177,19 +172,4 @@ public class StagingActionServiceImpl implements StagingActionService {
                 }));
     }
 
-    @Override
-    public Mono<List<StagingAction>> getApprovedStagedActionsPendingProcessing(Mono<WorkFlowDto> workFlowDtoMono) {
-        return workFlowDtoMono.publishOn (Schedulers.boundedElastic ())
-                .publishOn (Schedulers.boundedElastic ())
-                .map (workFlowDto -> {
-                    List<StagingAction> stagingActions = stagingActionRepository.findAllFinalizedTrueAndApprovedTrueAndProcessedFalse ();
-                    return stagingActions
-                            .stream ()
-                            .map (stagingAction -> {
-                                stagingAction.setProcessed (true);
-                                return stagingActionRepository.save (stagingAction);
-                            }).toList ();
-                })
-                .publishOn (Schedulers.boundedElastic ());
-    }
 }

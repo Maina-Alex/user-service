@@ -1,11 +1,13 @@
 package com.eclectics.io.esbusermodule.service.impl;
 
 import com.eclectics.io.esbusermodule.constants.MessageType;
+import com.eclectics.io.esbusermodule.constants.SystemProcess;
 import com.eclectics.io.esbusermodule.model.*;
 import com.eclectics.io.esbusermodule.repository.*;
 import com.eclectics.io.esbusermodule.service.IUserInterface;
 import com.eclectics.io.esbusermodule.util.UniversalResponse;
 import com.eclectics.io.esbusermodule.util.UtilFunctions;
+import com.eclectics.io.esbusermodule.workflowService.WorkFlowFilter;
 import com.eclectics.io.esbusermodule.wrapper.*;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
@@ -43,6 +45,7 @@ public class UserService implements IUserInterface {
      * @param createUserWrapper UserWrapper
      * @return Universal response of success if user is saved
      */
+    @WorkFlowFilter(processName = SystemProcess.CREATE_ADMIN)
     @Override
     public Mono<UniversalResponse> createSystemUser(CreateUserWrapper createUserWrapper) {
         return Mono.fromCallable (() -> {
@@ -98,6 +101,19 @@ public class UserService implements IUserInterface {
     }
 
     @Override
+    public Mono<SystemUser> getSystemUserByUsername(String username) {
+        return Mono.fromCallable (() -> {
+            SystemUser systemUser = systemUserRepository.findTopByEmailAndSoftDeleteFalse (username)
+                    .orElse (null);
+            if (systemUser == null)
+                throw new IllegalStateException ("User does not exist");
+
+            return systemUser;
+        }).publishOn (Schedulers.boundedElastic ());
+    }
+
+    @WorkFlowFilter(processName = SystemProcess.UPDATE_ADMIN)
+    @Override
     public Mono<UniversalResponse> updateUser(UpdateUserWrapper updateUserWrapper) {
         return Mono.fromCallable (() -> {
             SystemUser systemUser = systemUserRepository
@@ -123,6 +139,7 @@ public class UserService implements IUserInterface {
             return UniversalResponse.builder ().status (200).message ("User updated successfully").build ();
         }).publishOn (Schedulers.boundedElastic ());
     }
+
     @Override
     public Mono<UniversalResponse> resetUser(ResetUserPassword resetUserPassword) {
         return Mono.fromCallable (() -> {
@@ -192,6 +209,7 @@ public class UserService implements IUserInterface {
                     .totalItems ((int) systemUsers.getTotalElements ()).build ();
         }).publishOn (Schedulers.boundedElastic ());
     }
+    @WorkFlowFilter (processName = SystemProcess.DELETE_ADMIN)
     @Override
     public Mono<UniversalResponse> deleteUser(CommonWrapper commonWrapper) {
         return Mono.fromCallable (() -> {
@@ -208,6 +226,7 @@ public class UserService implements IUserInterface {
                     .build ();
         }).publishOn (Schedulers.boundedElastic ());
     }
+    @WorkFlowFilter (processName = SystemProcess.DISABLE_ADMIN)
     @Override
     public Mono<UniversalResponse> disableUser(CommonWrapper commonWrapper) {
         return Mono.fromCallable (() -> {
@@ -222,6 +241,7 @@ public class UserService implements IUserInterface {
             return UniversalResponse.builder ().message ("System administrator disabled successfully").build ();
         }).publishOn (Schedulers.boundedElastic ());
     }
+    @WorkFlowFilter (processName = SystemProcess.ENABLE_ADMIN)
     @Override
     public Mono<UniversalResponse> enableUser(CommonWrapper commonWrapper) {
         return Mono.fromCallable (() -> {
@@ -237,6 +257,7 @@ public class UserService implements IUserInterface {
                     .build ();
         }).publishOn (Schedulers.boundedElastic ());
     }
+    @WorkFlowFilter (processName = SystemProcess.CREATE_PROFILE)
     @Override
     public Mono<UniversalResponse> createProfile(CreateProfileWrapper profileWrapper) {
         return Mono.fromCallable (() -> {
@@ -250,6 +271,7 @@ public class UserService implements IUserInterface {
             return UniversalResponse.builder ().status (200).message ("Profile saved successfully").build ();
         }).publishOn (Schedulers.boundedElastic ());
     }
+    @WorkFlowFilter (processName = SystemProcess.UPDATE_PROFILE)
     @Override
     public Mono<UniversalResponse> updateProfile(CommonProfileWrapper profileWrapper) {
         return Mono.fromCallable (() -> {
@@ -263,6 +285,7 @@ public class UserService implements IUserInterface {
             return UniversalResponse.builder ().status (200).message ("Profile updated successfully").build ();
         }).publishOn (Schedulers.boundedElastic ());
     }
+    @WorkFlowFilter (processName = SystemProcess.DELETE_PROFILE)
     @Override
     public Mono<UniversalResponse> archiveProfile(CommonProfileWrapper commonProfileWrapper) {
         return Mono.fromCallable (() -> {
@@ -280,6 +303,7 @@ public class UserService implements IUserInterface {
             return UniversalResponse.builder ().status (200).message ("Profile archived successfully").build ();
         }).publishOn (Schedulers.boundedElastic ());
     }
+
     @Override
     public Mono<UniversalResponse> getProfile(CommonProfileWrapper commonProfileWrapper) {
         return Mono.fromCallable (() -> {
@@ -320,7 +344,7 @@ public class UserService implements IUserInterface {
                     .build ();
         }).publishOn (Schedulers.boundedElastic ());
     }
-
+    @WorkFlowFilter (processName = SystemProcess.DELETE_ROLE)
     @Override
     public Mono<UniversalResponse> deleteRole(CommonRoleWrapper roleWrapper) {
         return Mono.fromCallable (()-> {
@@ -337,6 +361,7 @@ public class UserService implements IUserInterface {
         }).publishOn (Schedulers.boundedElastic ());
     }
 
+    @WorkFlowFilter (processName = SystemProcess.CREATE_ROLE)
     @Override
     public Mono<UniversalResponse> addRole(CommonRoleWrapper roleWrapper) {
         return Mono.fromCallable (() -> {
@@ -354,6 +379,7 @@ public class UserService implements IUserInterface {
         }).publishOn (Schedulers.boundedElastic ());
     }
 
+    @WorkFlowFilter (processName = SystemProcess.ASSIGN_ROLE_TO_PROFILE)
     @Override
     public Mono<UniversalResponse> addRolesToProfile(CommonRoleWrapper commonRoleWrapper) {
         return Mono.fromCallable (() -> {
@@ -386,6 +412,7 @@ public class UserService implements IUserInterface {
             return UniversalResponse.builder ().status (200).message ("Added roles to profile successfully").build ();
         }).publishOn (Schedulers.boundedElastic ());
     }
+    @WorkFlowFilter (processName = SystemProcess.REMOVE_ROLE_FROM_PROFILE)
     @Override
     public Mono<UniversalResponse> removeRolesFromProfile(CommonRoleWrapper commonRoleWrapper) {
         return Mono.fromCallable (() -> {
@@ -412,6 +439,7 @@ public class UserService implements IUserInterface {
             return UniversalResponse.builder ().status (200).message ("Removed roles successfully").build ();
         }).publishOn (Schedulers.boundedElastic ());
     }
+    @WorkFlowFilter (processName = SystemProcess.ADD_MESSAGE_TEMPLATE)
     @Override
     @SuppressWarnings ("UnstableApiUsage")
     public Mono<UniversalResponse> addMessageTemplate(MessageTemplate messageTemplate) {

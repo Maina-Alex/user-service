@@ -15,7 +15,6 @@ import java.util.List;
 @AllArgsConstructor
 public class StagingActionDto {
     private long id;
-    private String workSpaceId;
     private long workflowId;
     private String stagingUserDetails;
     private String stagingCurrentData;
